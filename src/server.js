@@ -24,6 +24,7 @@ const allowedOrigins = [
     'http://localhost:3080', 
     'http://localhost:3081', // Local development    
     'https://frontend-react-js-trang-chu-web-ban-game.vercel.app',
+    'https://frontend-react-js-trang-admin-web-ban-game.vercel.app'
 ];
 
 app.use(cors({
