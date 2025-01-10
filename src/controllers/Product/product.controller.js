@@ -78,6 +78,8 @@ module.exports = {
             if (GiamGiaSP) {
                 query.GiamGiaSP = { $gt: GiamGiaSP };  // Lọc tài khoản có GiamGiaSP lớn hơn 20
             }
+
+            // query.isActive = true
             
             let sp = await SanPham.find(query)
                 .populate("IdLoaiSP")
@@ -264,7 +266,9 @@ module.exports = {
             
                 // Lọc tài khoản có giá trong sizes[0].price nằm trong khoảng giatri1 và giatri2
                 if (convert_string) {
-                    query.GiaBan = {$gte: giatri1, $lte: giatri2};
+                    query.GiaBan = {
+                        $gte: giatri1, $lte: giatri2
+                    };
                 }
             }
            
