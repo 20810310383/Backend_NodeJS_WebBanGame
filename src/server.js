@@ -4,6 +4,7 @@ const viewEngine = require('./config/viewEngine');
 const uploadRouter = require('./routes/uploadRouter');
 const productRouter = require('./routes/productRouter');
 const categoryRouter = require('./routes/theLoaiRouter');
+const khRouter = require('./routes/loginKHRouter');
 const connectDB = require('./config/connectDB');
 const cors = require('cors');
 const multer = require('multer');
@@ -58,6 +59,7 @@ const routes = [
     // { path: '/api/accadmin', router: adminRouter },   
     { path: '/api/product', router: productRouter }, 
     { path: '/api/category', router: categoryRouter },
+    { path: '/api/kh', router: khRouter },
 ];
   
 routes.forEach(route => app.use(route.path, route.router));
