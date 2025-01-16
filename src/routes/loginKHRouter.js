@@ -1,6 +1,6 @@
 const express = require("express");
-const { loginAccKH, registerAccKH, logoutKH, xacThucOTP } = require("../controllers/Login/login.kh.controller");
-
+const { loginAccKH, registerAccKH, logoutKH, xacThucOTP, quenMatKhauKH,  } = require("../controllers/Login/login.kh.controller");
+const { getKH, updateKH, deleteKH, khoaAccKH, getOneAccKH } = require("../controllers/KhachHang/khachhang.controller");
 
 const router = express.Router();
 
@@ -13,25 +13,16 @@ router.post("/logout-kh", logoutKH );
 
 router.post("/xac-thuc-otp-kh", xacThucOTP );
 
-// router.get("/check-status", checkTrangThaiIsActive );
+router.post("/quen-mat-khau", quenMatKhauKH)
 
-// // find all acc kh
-// router.get("/get-kh", getAccKH );
+router.get("/get-kh", getKH );
+router.get("/get-one-kh", getOneAccKH );
 
-// router.get("/get-one-kh", getOneAccKH );
+router.put("/update-kh", updateKH );
 
-// // update acc kh
-// router.put("/update-kh", updateAccKH );
+router.put("/khoa-kh", khoaAccKH );
 
-// router.put("/khoa-kh", khoaAccKH );
-
-// // delete acc kh
-// router.delete("/delete-kh/:id", deleteAccKH );
-
-// // router.post("/auth/google", verifyGoogleToken );
-
-// // quên mật khẩu
-// router.post("/quen-mat-khau", quenMatKhauKH)
+router.delete("/delete-kh/:id", deleteKH );
 
 // // đổi thông tin khách hàng
 // router.put("/doi-thong-tin", doiThongTinKH)

@@ -59,14 +59,14 @@ module.exports = {
             const token = jwt.sign(
                 { adminId: admin._id, email: admin.email },
                 JWT_SECRET,
-                { expiresIn: '10m' } // Token hết hạn sau 10 phút
+                { expiresIn: '1m' } // Token hết hạn sau 10 phút
             );
 
              // Lưu token vào cookie
             res.cookie('token', token, {
                 httpOnly: true, // Bảo mật hơn khi chỉ có server mới có thể truy cập cookie này
                 secure: process.env.NODE_ENV === 'production', // Chỉ cho phép cookie qua HTTPS nếu là production
-                maxAge: 10 * 60 * 1000, // Cookie hết hạn sau 10 phút (10 phút x 60 giây x 1000ms)
+                maxAge: 1 * 60 * 1000, // Cookie hết hạn sau 10 phút (10 phút x 60 giây x 1000ms)
             });
 
             // Trả về thông tin admin (có thể trả về thông tin khác tùy nhu cầu)
@@ -215,26 +215,63 @@ module.exports = {
         }
     },
 
-    checkTrangThaiIsActive: async (req, res) => {
-        const token = req.headers['authorization']?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'Không có token xác thực' });
-        }
-
+    quenMatKhauKH: async (req, res) => {
+        const { email_doimk } = req.body;
+        console.log("email đổi mk: ", email_doimk);
+    
         try {
-            const decoded = jwt.verify(token, JWT_SECRET);
-            const admin = await AccKH.findById(decoded.adminId);
-            if (!admin) {
-                return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+            // Kiểm tra xem tài khoản có tồn tại không
+            let tk_doimk = await AccKH.findOne({ email: email_doimk });
+            
+            if (!tk_doimk) {
+                console.log("Không tồn tại tài khoản");
+                return res.status(404).json({ message: 'Không tồn tại tài khoản! Vui lòng kiểm tra lại email của bạn.', data: false });
             }
-
-            if (!admin.isActive) {
-                return res.status(400).json({ message: 'Tài khoản đã bị khóa' });
-            }
-
-            res.status(200).json({ message: 'Tài khoản vẫn hoạt động' });
+    
+            // Tạo mật khẩu ngẫu nhiên
+            const newPassword = Math.random().toString(36).slice(-6);
+    
+            // Mã hóa mật khẩu mới
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+            // Lưu mật khẩu đã mã hóa vào cơ sở dữ liệu
+            tk_doimk.password = hashedPassword;
+            await tk_doimk.save();
+    
+            // Tạo transporter để gửi email
+            const transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+    
+            // Cấu hình email
+            const mailOptions = {
+                from: 'Admin', 
+                to: email_doimk,
+                subject: 'Yêu cầu lấy lại mật khẩu',
+                text: `Mật khẩu mới của bạn là: ${newPassword}`,
+                html: `
+                    <p style="color: green;">Mật khẩu mới của bạn là: <strong>${newPassword}</strong></p>
+                    <p>Vui lòng đăng nhập với mật khẩu mới này để tiếp tục sử dụng dịch vụ.</p>
+                `
+            };
+    
+            // Gửi email với async/await thay vì callback
+            await transporter.sendMail(mailOptions);
+    
+            console.log('Email sent');
+            return res.status(200).json({
+                data: true,
+                message: `Mật khẩu mới đã được gửi tới email của bạn. Vui lòng kiểm tra email ${email_doimk} để lấy lại mật khẩu!`
+            });
+    
         } catch (error) {
-            res.status(500).json({ message: 'Lỗi server' });
+            // Xử lý lỗi khi có lỗi xảy ra trong bất kỳ bước nào
+            console.error('Lỗi trong quá trình xử lý:', error);
+            return res.status(500).json({ message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.', data: false });
         }
-    }
+    },
 }

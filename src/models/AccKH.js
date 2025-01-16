@@ -10,6 +10,9 @@ const AccKH_Schema = new mongoose.Schema({
         otpExpires: { type: Date },  // Thêm trường lưu thời gian hết hạn mã OTP
         isActive: { type: Boolean, default: false},        // Trạng thái tài khoản
         quayMayManCount: { type: Number, default: 3 },     // Thêm trường quay may mắn
+        soDu: { type: Number, default: 0 }, 
+        soTienNap: { type: Number, default: 0 }, 
+
     },
     { 
         timestamps: true,   // createAt, updateAt
