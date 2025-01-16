@@ -117,9 +117,9 @@ module.exports = {
 
     createProduct: async (req, res) => {
         try {
-            let {TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon} = req.body                                      
+            let {TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note} = req.body                                      
 
-            let createSP = await SanPham.create({TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon})
+            let createSP = await SanPham.create({TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note})
 
             if(createSP){
                 return res.status(200).json({
@@ -145,9 +145,9 @@ module.exports = {
 
     updateProduct: async (req, res) => {
         try {
-            let {_id, TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon} = req.body
+            let {_id, TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note} = req.body
 
-            let updateTL = await SanPham.updateOne({_id: _id},{TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon})
+            let updateTL = await SanPham.updateOne({_id: _id},{TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note})
 
             if(updateTL) {
                 return res.status(200).json({

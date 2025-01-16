@@ -8,6 +8,7 @@ const SanPham_Schema = new mongoose.Schema(
         GiamGiaSP: { type: Number, default: "0" },
         urlYoutube: { type: String },
         MoTa: { type: String, default: "Not thing" },
+        Note: { type: String, default: "Not thing" },
         SoLuongBan: { type: Number, required: false, default: "1" },
         ImageSlider: [{ type: String }],    
         Image: { type: String, required: false },     
