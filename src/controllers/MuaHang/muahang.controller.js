@@ -1,4 +1,6 @@
+const { default: mongoose } = require('mongoose');
 const AccKH = require('../../models/AccKH');
+const Order = require('../../models/Order');
 const SanPham = require('../../models/SanPham');
 
 require('dotenv').config();
@@ -34,7 +36,10 @@ module.exports = {
 
             sp = await SanPham.findByIdAndUpdate(
                 {_id: idSP},
-                {$inc: {SoLuongTon: -quantity}},  // Giảm số lượng tồn kho
+                {
+                    $inc: {SoLuongTon: -quantity},
+                    isActive: false
+                },  // Giảm số lượng tồn kho
                 {new: true}  
             ).populate('IdLoaiSP');
 
@@ -60,6 +65,11 @@ module.exports = {
                 {soDu: soDuUpdate},
                 {new: true}
             );
+
+            let luuCSDL = await Order.create({
+                IdSP: idSP, 
+                IdKH: idKH, 
+            })
     
             console.log("sp: ", sp);
             console.log("kh: ", kh);
@@ -67,7 +77,8 @@ module.exports = {
             let mess = `Cảm ơn bạn đã chốt tài khoản ${sp.TenSP} thành công!`;
             return res.status(200).json({
                 message: mess,
-                errCode: 0
+                errCode: 0,
+                data: luuCSDL
             });            
         } catch (error) {
             console.error(error);
@@ -76,5 +87,51 @@ module.exports = {
                 error: error.message,
             });
         }   
+    },
+
+    getAllOrder: async (req, res) => {
+        try {
+            let {page, limit, name, sort, order, idKH} = req.query
+
+            // Chuyển đổi thành số
+            const pageNumber = parseInt(page, 10);
+            const limitNumber = parseInt(limit, 10);           
+
+            // Tính toán số bản ghi bỏ qua
+            const skip = (pageNumber - 1) * limitNumber;
+
+            // Tạo query tìm kiếm
+            const query = {};
+            if (idKH) {
+                query.IdKH = new mongoose.Types.ObjectId(idKH);
+            }
+
+            let orderSP = await Order.find(query).populate("IdSP IdKH").skip(skip).limit(limitNumber)         
+            
+            const totalOrderSP = await Order.countDocuments(query); // Đếm tổng số chức vụ
+
+            const totalPages = Math.ceil(totalOrderSP / limitNumber); // Tính số trang
+
+            if(orderSP) {
+                return res.status(200).json({
+                    errCode: 0,
+                    data: orderSP,     
+                    totalOrderSP,
+                    totalPages,
+                    currentPage: pageNumber,
+                })
+            } else {
+                return res.status(500).json({
+                    message: "Tìm thất bại!",
+                    errCode: -1,
+                })
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                message: "Có lỗi xảy ra.",
+                error: error.message,
+            });
+        } 
     }
 }

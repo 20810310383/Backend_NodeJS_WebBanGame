@@ -7,7 +7,7 @@ module.exports = {
 
     getTheLoai: async (req, res) => {
         try {
-            let { page, limit, TenLoaiSP, sort, order } = req.query; 
+            let { page, limit, TenLoaiSP, sort, order, isActive } = req.query; 
 
             // Chuyển đổi thành số
             const pageNumber = parseInt(page, 10);
@@ -40,7 +40,7 @@ module.exports = {
             // Tính tổng số sản phẩm cho mỗi thể loại
             const loaiSPsWithTotal = await Promise.all(
                 loaisp.map(async (item) => {
-                    const totalProducts = await SanPham.countDocuments({ IdLoaiSP: item._id });
+                    const totalProducts = await SanPham.countDocuments({ IdLoaiSP: item._id, isActive: true });
                     return { ...item.toObject(), totalProducts: totalProducts.toString() }; // Kết hợp tổng sản phẩm vào item
                 })
             );

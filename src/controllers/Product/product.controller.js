@@ -10,7 +10,7 @@ module.exports = {
 
     getProducts: async (req, res) => {
         try {
-            const { page, limit, TenSP, sort, order, locTheoLoai, locTheoGia, GiamGiaSP, tu, den } = req.query; 
+            const { page, limit, TenSP, sort, order, locTheoLoai, locTheoGia, GiamGiaSP, tu, den, isActive } = req.query; 
 
             // Chuyển đổi thành số
             const pageNumber = parseInt(page, 10);
@@ -79,7 +79,36 @@ module.exports = {
                 query.GiamGiaSP = { $gt: GiamGiaSP };  // Lọc tài khoản có GiamGiaSP lớn hơn 20
             }
 
-            // query.isActive = true
+            if(isActive){
+                query.isActive = isActive
+                let sp = await SanPham.find(query)
+                .populate("IdLoaiSP")
+                .skip(skip)
+                .limit(limitNumber)
+                .sort({ [sort]: sortOrder })           
+
+                const totalSanPham = await SanPham.countDocuments(query); // Đếm tổng số chức vụ
+
+                const totalPages = Math.ceil(totalSanPham / limitNumber); // Tính số trang
+
+                if(sp) {
+                    return res.status(200).json({
+                        message: "Đã tìm ra products",
+                        errCode: 0,
+                        data: sp,
+                        totalSanPham,
+                        totalPages,
+                        currentPage: pageNumber,
+                    })
+                } else {
+                    return res.status(500).json({
+                        message: "Tìm products thất bại!",
+                        errCode: -1,
+                    })
+                }
+            }
+
+            // query.isActive = isActive
             
             let sp = await SanPham.find(query)
                 .populate("IdLoaiSP")
@@ -222,7 +251,7 @@ module.exports = {
 
     getProductToCategorySPLienQuan: async (req, res) => {
         try {
-            const { page, limit, TenSP, sort, order, locTheoLoai, locTheoGia, GiamGiaSP, tu, den, IdLoaiSP } = req.query; 
+            const { page, limit, TenSP, sort, order, locTheoLoai, locTheoGia, GiamGiaSP, tu, den, IdLoaiSP, isActive } = req.query; 
             console.log("id: ", IdLoaiSP);
 
             // Chuyển đổi thành số
@@ -285,14 +314,44 @@ module.exports = {
 
             // Thêm điều kiện lọc theo loại tài khoản (IdLoaiSP)
             query.IdLoaiSP = new mongoose.Types.ObjectId(IdLoaiSP);
+
+            if(isActive){
+                query.isActive = isActive
+                let sp = await SanPham.find(query)
+                    .collation({ locale: 'vi', strength: 1 }) 
+                    .populate("IdLoaiSP")
+                    .skip(skip)
+                    .limit(limitNumber)
+                    .sort({ [sort]: sortOrder })            
+    
+                const totalSanPham = await SanPham.countDocuments(query); // Đếm tổng số chức vụ
+    
+                const totalPages = Math.ceil(totalSanPham / limitNumber); // Tính số trang
+    
+                if(sp) {
+                    return res.status(200).json({
+                        message: "Đã tìm ra products",
+                        errCode: 0,
+                        data: sp,
+                        totalSanPham,
+                        totalPages,
+                        currentPage: pageNumber,
+                    })
+                } else {
+                    return res.status(500).json({
+                        message: "Tìm products thất bại!",
+                        errCode: -1,
+                    })
+                }
+            } 
             
             let sp = await SanPham.find(query)
-                .collation({ locale: 'vi', strength: 1 }) 
-                .populate("IdLoaiSP")
-                .skip(skip)
-                .limit(limitNumber)
-                .sort({ [sort]: sortOrder })            
-
+                    .collation({ locale: 'vi', strength: 1 }) 
+                    .populate("IdLoaiSP")
+                    .skip(skip)
+                    .limit(limitNumber)
+                    .sort({ [sort]: sortOrder })            
+    
             const totalSanPham = await SanPham.countDocuments(query); // Đếm tổng số chức vụ
 
             const totalPages = Math.ceil(totalSanPham / limitNumber); // Tính số trang
