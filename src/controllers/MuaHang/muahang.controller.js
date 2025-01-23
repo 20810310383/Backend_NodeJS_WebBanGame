@@ -34,11 +34,13 @@ module.exports = {
                 });
             }
 
+            let check = sp.SoLuongTon - 1 >= 1; // Kiểm tra xem số lượng tồn kho có >= 1 hay không
+
             sp = await SanPham.findByIdAndUpdate(
                 {_id: idSP},
                 {
-                    $inc: {SoLuongTon: -quantity},
-                    isActive: false
+                    $inc: {SoLuongTon: -quantity, SoLuongBan: 1},
+                    isActive: check
                 },  // Giảm số lượng tồn kho
                 {new: true}  
             ).populate('IdLoaiSP');
@@ -74,7 +76,7 @@ module.exports = {
             console.log("sp: ", sp);
             console.log("kh: ", kh);
     
-            let mess = `Cảm ơn bạn đã chốt tài khoản ${sp.TenSP} thành công!`;
+            let mess = `Cảm ơn bạn đã chốt dự án: ${sp.TenSP} thành công!`;
             return res.status(200).json({
                 message: mess,
                 errCode: 0,
