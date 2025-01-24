@@ -7,6 +7,7 @@ const SanPham_Schema = new mongoose.Schema(
         GiaBan: { type: Number, required: false },
         GiamGiaSP: { type: Number, default: "0" },
         urlYoutube: { type: String },
+        urlDriverVideo: { type: String, default: "" },
         MoTa: { type: String, default: "Not thing" },
         Note: { type: String, default: "Vui lòng liên hệ admin để cung cấp lại!" },
         SoLuongBan: { type: Number, required: false, default: "1" },

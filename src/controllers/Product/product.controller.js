@@ -146,9 +146,9 @@ module.exports = {
 
     createProduct: async (req, res) => {
         try {
-            let {TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note} = req.body                                      
+            let {TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note, urlDriverVideo} = req.body                                      
 
-            let createSP = await SanPham.create({TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note})
+            let createSP = await SanPham.create({TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note, urlDriverVideo})
 
             if(createSP){
                 return res.status(200).json({
@@ -174,9 +174,9 @@ module.exports = {
 
     updateProduct: async (req, res) => {
         try {
-            let {_id, TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note} = req.body
+            let {_id, TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note, urlDriverVideo} = req.body
 
-            let updateTL = await SanPham.updateOne({_id: _id},{TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note})
+            let updateTL = await SanPham.updateOne({_id: _id},{TenSP, GiaBan, GiamGiaSP, urlYoutube, MoTa, ImageSlider, Image, IdLoaiSP, SoLuongTon, Note, urlDriverVideo})
 
             if(updateTL) {
                 return res.status(200).json({
