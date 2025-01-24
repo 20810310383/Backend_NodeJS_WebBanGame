@@ -1,6 +1,6 @@
 const express = require("express");
 const { loginAccKH, registerAccKH, logoutKH, xacThucOTP, quenMatKhauKH,  } = require("../controllers/Login/login.kh.controller");
-const { getKH, updateKH, deleteKH, khoaAccKH, getOneAccKH } = require("../controllers/KhachHang/khachhang.controller");
+const { getKH, updateKH, deleteKH, khoaAccKH, getOneAccKH, updateCongTienKhiNap } = require("../controllers/KhachHang/khachhang.controller");
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ router.get("/get-kh", getKH );
 router.get("/get-one-kh", getOneAccKH );
 
 router.put("/update-kh", updateKH );
+router.post("/check-payment", updateCongTienKhiNap );
 
 router.put("/khoa-kh", khoaAccKH );
 

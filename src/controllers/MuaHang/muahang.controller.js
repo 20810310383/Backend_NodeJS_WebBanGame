@@ -136,7 +136,7 @@ module.exports = {
             });
         } 
     },
-
+    
     getAllOrderThongBao: async (req, res) => {
         try {
             let {page, limit, name, sort, order, idKH} = req.query
@@ -148,10 +148,37 @@ module.exports = {
             // Tính toán số bản ghi bỏ qua
             const skip = (pageNumber - 1) * limitNumber;
 
-            // Tạo query tìm kiếm
-            const query = {};            
+            let timKH = await AccKH.findOne({
+                $or: [
+                    { name: name },    // Tìm kiếm theo tên khách hàng
+                    { email: name }    // Tìm kiếm theo email khách hàng
+                ]
+            });
+            let timSP = await SanPham.findOne({TenSP: name });
+            console.log("timKH: ", timKH);
+            
 
-            let orderSP = await Order.find(query).populate("IdSP IdKH").skip(skip).limit(limitNumber)         
+            // Tạo query tìm kiếm
+            const query = {};    
+            if(timKH)  {
+                query.IdKH = new mongoose.Types.ObjectId(timKH._id);
+            }
+            if(timSP)  {
+                query.IdSP = new mongoose.Types.ObjectId(timSP._id);
+            }
+            
+            
+            // Tạo đối tượng sắp xếp (sort)
+            let sortOrder = 1; // tang dn
+            if (order === 'desc') {
+                sortOrder = -1; 
+            }
+
+            let orderSP = await Order.find(query)
+            .populate("IdSP IdKH")           
+            .skip(skip)
+            .limit(limitNumber)
+            .sort({ [sort]: sortOrder })        
             
             const totalOrderSP = await Order.countDocuments(query); // Đếm tổng số chức vụ
 
@@ -178,5 +205,32 @@ module.exports = {
                 error: error.message,
             });
         } 
-    }
+    },    
+
+    updateOrder: async (req, res) => {
+        try {
+            let {_id, linkDownload} = req.body
+
+            let updateTL = await Order.updateOne({_id: _id},{linkDownload})
+
+            if(updateTL) {
+                return res.status(200).json({
+                    data: updateTL,
+                    message: "Chỉnh sửa linkDownload thành công"
+                })
+            } else {
+                return res.status(404).json({                
+                    message: "Chỉnh sửa linkDownload thất bại"
+                })
+            }
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                message: "Có lỗi xảy ra.",
+                error: error.message,
+            });
+        }
+    },
+
 }

@@ -169,4 +169,36 @@ module.exports = {
         }        
     },  
 
+    updateCongTienKhiNap: async (req, res) => {
+        const token = req.headers.authorization
+        const result = token.replace('Apikey', '') // bỏ chữ Apikey
+        const priveKey = '3f1b67a2-d02e-44f6-8a9c-d9a20dbbf5b6f2033b7e745de71000cf'
+        const {description, transferAmount} = req.body
+
+        console.log("token: ", token);
+        console.log("result: ", result);
+        console.log("description: ", description);
+        console.log("transferAmount: ", transferAmount);
+        
+
+        if(result !== priveKey){
+            return res.status(401).json({success: false})
+        } else {
+            const match = description.match(/[a-f0-9]{24}/)
+            const idUser = match[0]
+
+            console.log("match: ", match);
+            console.log("idUser: ", idUser);
+
+            const dataUser = await AccKH.findOne({_id: idUser})
+            if(dataUser) {
+                dataUser.soDu += transferAmount
+                await dataUser.save()
+                return res.status(200).json({success: true})
+            } else {
+                return res.status(400).json({success: false})
+            }
+        }
+    }
+
 }
