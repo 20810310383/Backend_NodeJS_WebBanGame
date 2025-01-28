@@ -203,47 +203,25 @@ module.exports = {
                 accumulated: parseInt(req.body.accumulated),
             };
 
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                    user: "checkfb9999@gmail.com", // Thay bằng email của bạn
-                    pass: "fufzgdridpmjhigt", // Mật khẩu ứng dụng (tạo trong Google Account)
-                },
-            });
-
-            // send email test
-
-            // Kiểm tra transaction tồn tại
-            const existingTransaction = await SePayTransaction.findOne({
-                _id: sePayWebhookData.id,
-            });
-            if (existingTransaction) {
-                return res.status(400).json({
-                    message: "transaction này đã thực hiện giao dịch",
+            // nếu SePayTransaction có hơn 1 giao dịch collection 
+            if (await SePayTransaction.countDocuments() > 0) {
+                const existingTransaction = await SePayTransaction.findOne({
+                    _id: sePayWebhookData.id,
                 });
+                if (existingTransaction) {
+                    return res.status(400).json({
+                        message: "transaction này đã thực hiện giao dịch",
+                    });
+                }
             }
 
             // api chứng thực
             const pattern = process.env.SEPAY_API_KEY;
-            const matches = sePayWebhookData.code.match(pattern);
-
-            const mailOptions = {
-                from: "checkfb9999@gmail.com",
-                to: "dtrinhit04@gmail.com",
-                subject: "Test email",
-                text:
-                    `body ${JSON.stringify(
-                        req.body,
-                        null,
-                        1
-                    )} - Header ${JSON.stringify(req.headers, null, 1)}` -
-                    `pattern: ${pattern}` -
-                    `matches: ${matches}`,
-            };
-            await transporter.sendMail(mailOptions);
+            const authorizationAPI = req.headers.authorization;
+            const apiKey = authorizationAPI.split(" ")[1];
 
             // kiểm tra xác thực api
-            if (pattern === matches[0]) {
+            if (pattern === apiKey) {
                 // Tạo lịch sử giao dịch
                 const newTransaction = await SePayTransaction.create({
                     _id: sePayWebhookData.id,
@@ -259,7 +237,8 @@ module.exports = {
                     referenceCode: sePayWebhookData.referenceCode,
                 });
 
-                const idUser = sePayWebhookData.content.replace("NAP", "");
+                const matchContent = sePayWebhookData.content.match(/NAP([a-f0-9]{24})/);
+                const idUser = matchContent[0].replace("NAP", "");
                 const updatedUser = await AccKH.findOneAndUpdate(
                     { _id: idUser },
                     {
@@ -292,6 +271,7 @@ module.exports = {
             }
             return res.status(400).json({ message: "Invalid transaction" });
         } catch (error) {
+            console.log("lỗi", error);
             return res.status(500).json({ message: error });
         } finally {
             session.endSession();
