@@ -238,9 +238,12 @@ module.exports = {
                 });
 
                 const matchContent = sePayWebhookData.content.match(/NAP([a-f0-9]{24})/);
+                console.log("matchContent: ", matchContent);                
                 const idUser = matchContent[0].replace("NAP", "");
+                console.log("idUser: ", idUser);                
                 const updatedUser = await AccKH.findOneAndUpdate(
-                    { _id: idUser },
+                    // { _id: idUser },
+                    { name: idUser },
                     {
                         $inc: { soDu: sePayWebhookData.transferAmount },
                         $push: {
