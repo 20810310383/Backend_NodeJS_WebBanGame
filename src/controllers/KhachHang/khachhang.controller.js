@@ -271,8 +271,9 @@ module.exports = {
             }
             return res.status(400).json({ message: "Invalid transaction" });
         } catch (error) {
-            console.log("lỗi", error);
-            return res.status(500).json({ message: error });
+            await session.abortTransaction(); // Hủy giao dịch nếu có lỗi
+            console.error("Lỗi:", error);
+            return res.status(500).json({ message: error.message || "Internal Server Error" });
         } finally {
             session.endSession();
         }
