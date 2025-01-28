@@ -210,15 +210,8 @@ module.exports = {
                     pass: "fufzgdridpmjhigt", // Mật khẩu ứng dụng (tạo trong Google Account)
                 },
             });
-    
+
             // send email test
-            const mailOptions = {
-                from: "checkfb9999@gmail.com",
-                to: "dtrinhit04@gmail.com",
-                subject: "Test email",
-                text: `body ${JSON.stringify(req.body, null, 1)} - Header ${JSON.stringify(req.headers, null, 1)}`,
-            };
-            await transporter.sendMail(mailOptions);
 
             // Kiểm tra transaction tồn tại
             const existingTransaction = await SePayTransaction.findOne({
@@ -233,6 +226,21 @@ module.exports = {
             // api chứng thực
             const pattern = process.env.SEPAY_API_KEY;
             const matches = sePayWebhookData.code.match(pattern);
+
+            const mailOptions = {
+                from: "checkfb9999@gmail.com",
+                to: "dtrinhit04@gmail.com",
+                subject: "Test email",
+                text:
+                    `body ${JSON.stringify(
+                        req.body,
+                        null,
+                        1
+                    )} - Header ${JSON.stringify(req.headers, null, 1)}` -
+                    `pattern: ${pattern}` -
+                    `matches: ${matches}`,
+            };
+            await transporter.sendMail(mailOptions);
 
             // kiểm tra xác thực api
             if (pattern === matches[0]) {
@@ -285,6 +293,28 @@ module.exports = {
             return res.status(400).json({ message: "Invalid transaction" });
         } catch (error) {
             console.error(error);
+
+            const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                    user: "checkfb9999@gmail.com", // Thay bằng email của bạn
+                    pass: "fufzgdridpmjhigt", // Mật khẩu ứng dụng (tạo trong Google Account)
+                },
+            });
+
+            // send email test
+            const mailOptions = {
+                from: "checkfb9999@gmail.com",
+                to: "dtrinhit04@gmail.com",
+                subject: "Test email",
+                text: `body ${JSON.stringify(
+                    req.body,
+                    null,
+                    1
+                )} - Header ${JSON.stringify(req.headers, null, 1)}`,
+            };
+            await transporter.sendMail(mailOptions);
+
             return res.status(500).json({ message: "Internal server error" });
         } finally {
             session.endSession();
