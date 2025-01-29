@@ -2,6 +2,7 @@ const AccKH = require("../../models/AccKH");
 const nodemailer = require("nodemailer");
 const SePayTransaction = require("../../models/SepayTransaction");
 const { default: mongoose } = require("mongoose");
+const PhanThuong = require("../../models/PhanThuong");
 
 require("dotenv").config();
 
@@ -71,14 +72,14 @@ module.exports = {
 
     updateKH: async (req, res) => {
         try {
-            let { _id, name, email, soDu, soTienNap } = req.body;
+            let { _id, name, email, soDu, soTienNap, quayMayManCount } = req.body;
 
             console.log("soDu: ", soDu);
             console.log("soTienNap: ", soTienNap);
 
             let updateTL = await AccKH.updateOne(
                 { _id: _id },
-                { name, email, soDu, soTienNap }
+                { name, email, soDu, soTienNap, quayMayManCount }
             );
 
             if (updateTL) {
@@ -282,4 +283,175 @@ module.exports = {
             session.endSession();
         }
     },
+
+    quaySoMayMan1: async (req, res) => {
+        try {
+            let { userId } = req.body;
+            console.log("userId: ", userId);
+    
+            // Lấy thông tin khách hàng
+            const user = await AccKH.findById(userId);
+    
+            // Kiểm tra xem người dùng có còn lượt quay không
+            if (user.quayMayManCount <= 0) {
+                return res.status(500).json({
+                    message: "Bạn đã hết lượt quay số may mắn.",
+                    errCode: -1,
+                });
+            }
+    
+            // Giảm số lần quay đi 1
+            user.quayMayManCount -= 1;
+    
+            // Lấy danh sách phần thưởng từ cơ sở dữ liệu
+            const prizes = await PhanThuong.find({});
+    
+            // Tính toán tỷ lệ trúng thưởng cho mỗi phần thưởng
+            const weightedPrizes = [];
+            prizes.forEach(prize => {
+                const numberOfTimes = prize.rate; // Sử dụng trực tiếp tỷ lệ phần trăm (1 đến 100)
+                for (let i = 0; i < numberOfTimes; i++) {
+                    weightedPrizes.push(prize); // Đẩy phần thưởng vào mảng theo tỷ lệ
+                }
+            });
+    
+            // Chọn ngẫu nhiên phần thưởng từ mảng weightedPrizes
+            const randomIndex = Math.floor(Math.random() * weightedPrizes.length);
+            const prize = weightedPrizes[randomIndex];
+    
+            // Lưu lại thay đổi số lượt quay
+            await user.save();
+    
+            return res.status(200).json({
+                message: "Quay số thành công!",
+                errCode: 0,
+                prize,  // Trả về phần thưởng trúng
+                quayMayManCount: user.quayMayManCount,
+            });
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+
+    quaySoMayMan: async (req, res) => {
+        try {
+            let { userId } = req.body;
+            console.log("userId: ", userId);            
+            
+            // Lấy thông tin khách hàng
+            const user = await AccKH.findById(userId);
+    
+            // Kiểm tra xem người dùng có còn lượt quay không
+            if (user.quayMayManCount <= 0) {
+                return res.status(500).json({
+                    message: "Bạn đã hết lượt quay số may mắn.",
+                    errCode: -1,
+                })
+            }
+    
+            // Giảm số lần quay đi 1
+            user.quayMayManCount -= 1;
+    
+            // Lưu lại thay đổi
+            await user.save();
+
+            return res.status(200).json({
+                message: "Quay số thành công!",
+                errCode: 0,
+                // prize,  // Trả về phần thưởng
+                quayMayManCount: user.quayMayManCount,
+            });
+                           
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+
+    nhanThuong: async (req, res) => {
+        try {
+            let { userId, prizeAmount } = req.body;  // prizeAmount là phần thưởng trúng được từ quay số
+            console.log("userId: ", userId);
+            console.log("Prize Amount: ", prizeAmount); // Số tiền phần thưởng
+    
+            // Lấy thông tin người dùng
+            const user = await AccKH.findById(userId);
+    
+            if (!user) {
+                return res.status(404).json({
+                    message: "Người dùng không tồn tại.",
+                    errCode: -1,
+                });
+            }
+    
+            // Cộng tiền thưởng vào số dư của người dùng
+            user.soDu += prizeAmount;
+    
+            // Lưu lại thay đổi
+            await user.save();
+    
+            return res.status(200).json({
+                message: "Phần thưởng này đã được cộng vào số dư của bạn.",
+                errCode: 0, 
+                soDu: user.soDu  // Trả về số dư mới
+            });
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+    
+    nhanThuong1: async (req, res) => {
+        try {
+            let { userId, IdPhanThuong } = req.body;
+            console.log("userId: ", userId);
+            console.log("IdPhanThuong: ", IdPhanThuong);
+            const voucherId = new mongoose.Types.ObjectId(IdPhanThuong);
+
+            const user = await AccKH.findById(userId);
+
+            if (!user) {
+                return res.status(404).json({
+                    message: "Người dùng không tồn tại.",
+                    errCode: -1,
+                });
+            }
+
+            user.IdPhanThuong = [...user.IdPhanThuong, IdPhanThuong];
+
+            // Lưu lại thay đổi
+            await user.save();
+
+            return res.status(200).json({
+                message: "Đã nhận phần thưởng!",
+                errCode: 0,                    
+            }); 
+    
+            // Kiểm tra nếu `IdPhanThuong` nằm trong danh sách `IdPhanThuong` của người dùng
+            // const voucherExists = user.IdPhanThuong.some(
+            //     // (voucher) => voucher.toString() === IdPhanThuong
+            //     (voucher) => voucher.toString() === voucherId.toString()
+            // );             
+    
+            // if (voucherExists) {
+            //     return res.status(200).json({
+            //         message: "Voucher đã tồn tại trong tài khoản. Không thể nhận thêm.",
+            //         errCode: -1,
+            //     });
+            // } else {                
+            //     // user.IdPhanThuong.push(IdPhanThuong);
+            //     user.IdPhanThuong = [...user.IdPhanThuong, IdPhanThuong];
+
+            //     // Lưu lại thay đổi
+            //     await user.save();
+
+            //     return res.status(200).json({
+            //         message: "Đã nhận phần thưởng!",
+            //         errCode: 0,                    
+            //     });               
+            // }                
+                           
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+  
 };

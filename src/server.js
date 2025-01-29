@@ -6,6 +6,7 @@ const productRouter = require('./routes/productRouter');
 const categoryRouter = require('./routes/theLoaiRouter');
 const khRouter = require('./routes/loginKHRouter');
 const muaHangRouter = require('./routes/muaHangRouter');
+const hopQuaRouter = require('./routes/hopQuaRouter');
 const connectDB = require('./config/connectDB');
 const cors = require('cors');
 const multer = require('multer');
@@ -64,6 +65,7 @@ const routes = [
     { path: '/api/category', router: categoryRouter },
     { path: '/api/kh', router: khRouter },
     { path: '/api/order', router: muaHangRouter },
+    { path: '/api/hopqua', router: hopQuaRouter },
 ];
   
 routes.forEach(route => app.use(route.path, route.router));

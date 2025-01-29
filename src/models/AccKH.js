@@ -5,7 +5,7 @@ const AccKH_Schema = new mongoose.Schema({
         email: { type: String },
         password: { type: String,  },        
         tokenAccess: { type: String },                                                
-        IdVoucher: [{ref: "Voucher", type: mongoose.SchemaTypes.ObjectId}],
+        IdPhanThuong: [{ref: "PhanThuong", type: mongoose.SchemaTypes.ObjectId}],
         otp: { type: Number },  // Thêm trường lưu mã OTP
         otpExpires: { type: Date },  // Thêm trường lưu thời gian hết hạn mã OTP
         isActive: { type: Boolean, default: false},        // Trạng thái tài khoản

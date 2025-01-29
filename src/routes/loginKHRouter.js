@@ -32,7 +32,7 @@ router.get("/get-kh", getKH);
 router.get("/get-one-kh", getOneAccKH);
 
 router.put("/update-kh", updateKH);
-router.use("/check-payment", updateCongTienKhiNap,);
+router.post("/check-payment", updateCongTienKhiNap,);
 
 router.put("/khoa-kh", khoaAccKH);
 
