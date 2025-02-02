@@ -5,6 +5,7 @@ const uploadRouter = require('./routes/uploadRouter');
 const productRouter = require('./routes/productRouter');
 const categoryRouter = require('./routes/theLoaiRouter');
 const khRouter = require('./routes/loginKHRouter');
+const adminRouter = require('./routes/loginAdminRouter');
 const muaHangRouter = require('./routes/muaHangRouter');
 const hopQuaRouter = require('./routes/hopQuaRouter');
 const connectDB = require('./config/connectDB');
@@ -64,6 +65,7 @@ const routes = [
     { path: '/api/product', router: productRouter }, 
     { path: '/api/category', router: categoryRouter },
     { path: '/api/kh', router: khRouter },
+    { path: '/api/admin', router: adminRouter },
     { path: '/api/order', router: muaHangRouter },
     { path: '/api/hopqua', router: hopQuaRouter },
 ];
