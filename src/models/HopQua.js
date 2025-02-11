@@ -4,7 +4,6 @@ const HopQua_Schema = new mongoose.Schema({
         tenHopQua: { type: String},
         messageHopQua: { type: String, default: "Chúc mừng bạn đã nhận được một hộp quà từ chúng tôi" },             
         IdPhanThuong: {ref: "PhanThuong", type: mongoose.SchemaTypes.ObjectId, default: null},        
-        IdKH: [{ref: "AccKH", type: mongoose.SchemaTypes.ObjectId, default: null}],        
     },
     { 
         timestamps: true,   // createAt, updateAt
