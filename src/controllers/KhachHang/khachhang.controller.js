@@ -339,7 +339,7 @@ module.exports = {
             console.log("userId: ", userId);            
             
             // Lấy thông tin khách hàng
-            const user = await AccKH.findById(userId);
+            const user = await AccKH.findById(userId)
     
             // Kiểm tra xem người dùng có còn lượt quay không
             // if (user.quayMayManCount <= 0) {
