@@ -1,5 +1,6 @@
 const express = require("express");
 const { createProduct, deleteProduct, getDetailSP, getProducts, getProductToCategorySPLienQuan, updateProduct, deleteNhieuProduct, showHiddenProduct } = require('../controllers/Product/product.controller');
+const { getFeedbacks, createFeedback, deleteFeedback } = require("../controllers/Product/feedback.controller");
 
 const router = express.Router();
 
@@ -22,5 +23,9 @@ router.get("/get-product-idloaisp-lien-quan", getProductToCategorySPLienQuan );
 router.get("/get-detail-product", getDetailSP );
 
 router.put("/show-hidden-product", showHiddenProduct );
+
+router.get("/get-feedback", getFeedbacks );
+router.post("/create-feedback", createFeedback );
+router.delete("/delete-feedback/:id", deleteFeedback );
 
 module.exports = router;
