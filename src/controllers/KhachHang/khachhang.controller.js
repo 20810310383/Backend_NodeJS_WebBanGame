@@ -227,9 +227,10 @@ module.exports = {
                 // Lấy giá trị khuyến mãi từ database
                 const config = await Config.findOne({ key: "bonus_percent" }).session(session);
                 const bonusPercent = config?.value || 0; // Giá trị % do admin cài đặt
+                const dkien = config?.dieuKien || 0; // Giá trị dieukien gia tien do admin cài đặt
 
                 let bonus = 0;
-                if (sePayWebhookData.transferAmount >= 100000) {
+                if (sePayWebhookData.transferAmount >= dkien ) {
                     bonus = (sePayWebhookData.transferAmount * bonusPercent) / 100;
                 }
 
@@ -301,7 +302,7 @@ module.exports = {
 
     updatePhanTramNapTien: async (req, res) => {
         try {
-            const { value, _id } = req.body; // Giá trị % mới từ admin
+            const { value, _id, dieuKien, description } = req.body; // Giá trị % mới từ admin
     
             if (value < 0) {
                 return res.status(400).json({ message: "Invalid bonus percentage" });
@@ -309,7 +310,7 @@ module.exports = {
     
             const updatedConfig = await Config.findOneAndUpdate(
                 { _id: _id },
-                { value: value },
+                { value, dieuKien, description },
                 { new: true, upsert: true } // Nếu chưa có thì tạo mới
             );
     
@@ -321,6 +322,22 @@ module.exports = {
         } catch (error) {
             console.error("Error:", error);
             return res.status(500).json({ message: "Internal Server Error" });
+        }
+    },
+
+    findPhanTramNapTien: async (req, res) => {
+        let findRobux = await Config.findOne({})
+        if(findRobux) {
+            return res.status(200).json({
+                message: "Đã tìm ra Config",
+                errCode: 0,
+                data: findRobux,                   
+            })
+        } else {
+            return res.status(500).json({
+                message: "Tìm Config thất bại!",
+                errCode: -1,
+            })
         }
     },
 

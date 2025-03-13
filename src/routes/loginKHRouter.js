@@ -14,7 +14,9 @@ const {
     getOneAccKH,
     updateCongTienKhiNap,
     updatePhanTramNapTien,
+    findPhanTramNapTien,
 } = require("../controllers/KhachHang/khachhang.controller");
+const { findThongBaoBanner, createThongBaoBanner, updateThongBaoBanner } = require("../controllers/ThongBao/thongBao.controller");
 
 const router = express.Router();
 
@@ -42,5 +44,11 @@ router.delete("/delete-kh/:id", deleteKH);
 
 // // đổi thông tin khách hàng
 // router.put("/doi-thong-tin", doiThongTinKH)
+
+router.get("/get-PhanTramNapTien", findPhanTramNapTien);
+router.get("/get-thong-bao-banner", findThongBaoBanner);
+router.post("/create-thong-bao-banner", createThongBaoBanner);
+
+router.put("/update-thong-bao-banner", updateThongBaoBanner);
 
 module.exports = router;
