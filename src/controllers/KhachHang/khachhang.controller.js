@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const SePayTransaction = require("../../models/SepayTransaction");
 const { default: mongoose } = require("mongoose");
 const PhanThuong = require("../../models/PhanThuong");
+const Config = require("../../models/Config");
 
 require("dotenv").config();
 
@@ -223,6 +224,17 @@ module.exports = {
 
             // kiểm tra xác thực api
             if (pattern === apiKey) {
+                // Lấy giá trị khuyến mãi từ database
+                const config = await Config.findOne({ key: "bonus_percent" }).session(session);
+                const bonusPercent = config?.value || 0; // Giá trị % do admin cài đặt
+
+                let bonus = 0;
+                if (sePayWebhookData.transferAmount >= 100000) {
+                    bonus = (sePayWebhookData.transferAmount * bonusPercent) / 100;
+                }
+
+                const totalAmount = sePayWebhookData.transferAmount + bonus;
+
                 // Tạo lịch sử giao dịch
                 const newTransaction = await SePayTransaction.create({
                     _id: sePayWebhookData.id,
@@ -236,6 +248,7 @@ module.exports = {
                     description: sePayWebhookData.description,
                     transferAmount: sePayWebhookData.transferAmount,
                     referenceCode: sePayWebhookData.referenceCode,
+                    bonusAmount: bonus, // Thêm số tiền khuyến mãi vào DB
                 });
 
                 // const matchContent = sePayWebhookData.content.match(/NAP([a-f0-9]{24})/);
@@ -247,11 +260,13 @@ module.exports = {
                     // { _id: idUser },
                     { name: idUser },
                     {
-                        $inc: { soDu: sePayWebhookData.transferAmount },
+                        $inc: { soDu: totalAmount },
                         $push: {
                             transactionHistory: {
                                 date: new Date(),
                                 amount: sePayWebhookData.transferAmount,
+                                bonus: bonus, // Lưu lại tiền khuyến mãi
+                                total: totalAmount, // Tổng tiền sau khi cộng khuyến mãi
                                 type: "deposit",
                                 reference: sePayWebhookData.id,
                             },
@@ -281,6 +296,31 @@ module.exports = {
             return res.status(500).json({ message: error.message || "Internal Server Error" });
         } finally {
             session.endSession();
+        }
+    },
+
+    updatePhanTramNapTien: async (req, res) => {
+        try {
+            const { value, _id } = req.body; // Giá trị % mới từ admin
+    
+            if (value < 0) {
+                return res.status(400).json({ message: "Invalid bonus percentage" });
+            }
+    
+            const updatedConfig = await Config.findOneAndUpdate(
+                { _id: _id },
+                { value: value },
+                { new: true, upsert: true } // Nếu chưa có thì tạo mới
+            );
+    
+            return res.status(200).json({
+                success: true,
+                message: `Cập nhật khuyến mãi thành công: ${value}%`,
+                data: updatedConfig,
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            return res.status(500).json({ message: "Internal Server Error" });
         }
     },
 

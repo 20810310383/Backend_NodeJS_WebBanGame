@@ -13,6 +13,7 @@ const {
     khoaAccKH,
     getOneAccKH,
     updateCongTienKhiNap,
+    updatePhanTramNapTien,
 } = require("../controllers/KhachHang/khachhang.controller");
 
 const router = express.Router();
@@ -33,6 +34,7 @@ router.get("/get-one-kh", getOneAccKH);
 
 router.put("/update-kh", updateKH);
 router.post("/check-payment", updateCongTienKhiNap,);
+router.put("/update-phantramnaptien", updatePhanTramNapTien);
 
 router.put("/khoa-kh", khoaAccKH);
 
