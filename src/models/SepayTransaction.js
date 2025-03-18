@@ -12,7 +12,8 @@ const SePayTransactionModel = new mongoose.Schema(
             description: { type: String },
             transferAmount: { type: Number },
             referenceCode: { type: String },
-            accumulated: { type: Number }
+            accumulated: { type: Number },
+            bonusAmount: { type: Number },
       }
 );
 
